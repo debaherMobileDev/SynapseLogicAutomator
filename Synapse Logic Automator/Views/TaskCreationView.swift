@@ -38,12 +38,24 @@ struct TaskCreationView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.white.opacity(0.8))
                             
-                            TextField("Enter task title", text: $title)
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(12)
+                            ZStack(alignment: .leading) {
+                                // Placeholder
+                                if title.isEmpty {
+                                    Text("Enter task title")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white.opacity(0.3))
+                                        .padding(.horizontal, 16)
+                                        .allowsHitTesting(false)
+                                }
+                                
+                                // TextField without placeholder
+                                TextField("", text: $title)
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+                                    .padding()
+                            }
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(12)
                         }
                         
                         // Description
@@ -52,13 +64,27 @@ struct TaskCreationView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.white.opacity(0.8))
                             
-                            TextEditor(text: $description)
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .frame(height: 100)
-                                .padding(8)
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(12)
+                            ZStack(alignment: .topLeading) {
+                                // Placeholder
+                                if description.isEmpty {
+                                    Text("Enter task description")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white.opacity(0.3))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 16)
+                                        .allowsHitTesting(false)
+                                }
+                                
+                                // TextEditor with transparent background
+                                TextEditor(text: $description)
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+                                    .frame(height: 100)
+                                    .padding(8)
+                                    .modifier(TextEditorBackgroundModifier())
+                            }
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(12)
                         }
                         
                         // Priority
@@ -301,3 +327,20 @@ struct TagView: View {
     }
 }
 
+// ViewModifier for TextEditor background (iOS 15.6+ compatible)
+struct TextEditorBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            content
+                .scrollContentBackground(.hidden)
+        } else {
+            content
+                .onAppear {
+                    UITextView.appearance().backgroundColor = .clear
+                }
+                .onDisappear {
+                    UITextView.appearance().backgroundColor = nil
+                }
+        }
+    }
+}
